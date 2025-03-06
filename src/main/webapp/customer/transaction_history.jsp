@@ -66,22 +66,22 @@
       <table class="table table-bordered table-hover">
         <thead class="table-light">
         <tr>
-          <th scope="col">Nơi đi</th>
-          <th scope="col">Nơi đến</th>
-          <th scope="col">Ngày đặt</th>
-          <th scope="col">Ngày bay</th>
-          <th scope="col">Giá</th>
-          <th scope="col">Tình trạng</th>
+          <th scope="col" class="text-center">Nơi đi</th>
+          <th scope="col" class="text-center">Nơi đến</th>
+          <th scope="col" class="text-center">Ngày đặt</th>
+          <th scope="col" class="text-center">Ngày bay</th>
+          <th scope="col" class="text-center">Giá</th>
+          <th scope="col" class="text-center">Tình trạng</th>
         </tr>
         </thead>
         <tbody>
         <tr>
-          <td>Đà Nẵng</td>
-          <td>Hồ Chí Minh</td>
-          <td>15/05/2023</td>
-          <td>25/05/2023</td>
-          <td>1,000,000</td>
-          <td>Đã thanh toán </td>
+          <td class="text-center">Đà Nẵng</td>
+          <td class="text-center">Hồ Chí Minh</td>
+          <td class="text-center">15/05/2023</td>
+          <td class="text-center">25/05/2023</td>
+          <td class="text-center">1,000,000</td>
+          <td class="text-center">Đã thanh toán </td>
 
         </tr>
         </tbody>

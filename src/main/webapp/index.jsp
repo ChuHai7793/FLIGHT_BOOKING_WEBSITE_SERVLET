@@ -7,6 +7,7 @@
     <title>Đặt vé - MyWebsite</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
 </head>
 <body>
 <!-- Header với Navbar -->
@@ -46,6 +47,20 @@
     <form action="">
         <fieldset class="border p-4 rounded">
             <legend class="float-none w-auto px-2">Đặt vé</legend>
+
+            <div class="mb-3 d-flex align-items-center">
+                <label class="form-label me-3">Loại vé:</label>
+                <div class="form-check me-3">
+                    <input class="form-check-input" type="radio" name="ticket_type" id="one-way" value="one-way" checked>
+                    <label class="form-check-label" for="one-way">Một chiều</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="ticket_type" id="round-trip" value="round-trip">
+                    <label class="form-check-label" for="round-trip">Khứ hồi</label>
+                </div>
+            </div>
+
+
 
             <div class="row mb-3">
                 <div class="col-md-6">
@@ -96,9 +111,33 @@
 <a href="customer/payment.jsp"> chuyển hướng payment</a><br>
 <a href="customer/transaction_history.jsp"> chuyển hướng history</a><br>
 <a href="customer/change_password.jsp"> chuyển hướng change pw</a><br>
+<a href="customer/oneway_ticket.jsp"> chuyển hướng one way</a><br>
+<a href="customer/roundtrip_ticket.jsp"> chuyển hướng roundtrip</a><br>
 <!-- Bootstrap JS và Popper.js -->
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+<script>
+
+    const ticketTypeRadios = document.querySelectorAll('input[name="ticket_type"]');
+    const returnDateInput = document.getElementById("return-date");
+
+    // Lắng nghe sự kiện khi radio button thay đổi
+    ticketTypeRadios.forEach(radio => {
+        radio.addEventListener("change", function () {
+            if (this.value === "one-way") {
+                returnDateInput.disabled = true; // Vô hiệu hóa ô nhập "Ngày về"
+            } else {
+                returnDateInput.disabled = false; // Bật lại ô nhập "Ngày về"
+            }
+        });
+    });
+
+    // Đảm bảo mặc định khi tải trang, "Ngày về" bị vô hiệu hóa nếu chọn "Một chiều"
+    document.getElementById("one-way").checked = true;
+    returnDateInput.disabled = true;
+
+</script>
+
 </body>
 </html>
 
