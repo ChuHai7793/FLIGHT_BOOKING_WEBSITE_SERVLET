@@ -1,15 +1,18 @@
 package com.example.flightbookingmanagement.service;
 
 import com.example.flightbookingmanagement.dao.impl.CustomerDAOImpl;
+import com.example.flightbookingmanagement.dto.PaymentInfoDTO;
 import com.example.flightbookingmanagement.dto.SearchedTicketDTO;
 import com.example.flightbookingmanagement.dto.SearchedTicketFormDTO;
 import com.example.flightbookingmanagement.dto.TransactionHistoryDTO;
+import com.example.flightbookingmanagement.model.User;
 import com.example.flightbookingmanagement.utils.TicketsSorter;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
@@ -23,10 +26,22 @@ public class CustomerService {
 
     public void showAllTransactionHistories(HttpServletRequest request)
             throws SQLException, IOException, ServletException {
-
-        List<TransactionHistoryDTO> transaction_histories = customerDAO.selectTransactionHistory();
+        HttpSession session = request.getSession(false);
+        // Kiểm tra nếu session tồn tại
+        // Lấy user từ session
+        User user = (User) session.getAttribute("user");
+        List<TransactionHistoryDTO> transaction_histories = customerDAO.selectTransactionHistory(user.getUserId());
         request.setAttribute("transaction_histories", transaction_histories);
+    }
 
+    public void showAllPaymentInfos(HttpServletRequest request)
+            throws SQLException, IOException, ServletException {
+        HttpSession session = request.getSession(false);
+        // Kiểm tra nếu session tồn tại
+        // Lấy user từ session
+        User user = (User) session.getAttribute("user");
+        List<PaymentInfoDTO> payment_infos = customerDAO.selectPaymentInfo(user.getUserId());
+        request.setAttribute("payment_infos", payment_infos);
     }
 
 
@@ -73,5 +88,63 @@ public class CustomerService {
         RequestDispatcher dispatcher = request.getRequestDispatcher("customer/oneway_ticket.jsp");
         dispatcher.forward(request, response);
     }
+
+
+    //-------------------------------------- LOG IN ------------------------------------------
+    public void jumpToInfo(int userId,HttpServletRequest request, HttpServletResponse response)
+            throws SQLException, IOException, ServletException {
+        request.setAttribute("userId", userId);
+        RequestDispatcher dispatcher = request.getRequestDispatcher("customer/info.jsp");
+        dispatcher.forward(request, response);
+    }
+
+    //--------------------------------------------------------------------------------
+    public void jumpToTransactionHistory(HttpServletRequest request, HttpServletResponse response)
+            throws SQLException, IOException, ServletException {
+
+        RequestDispatcher dispatcher = request.getRequestDispatcher("customer/transaction_history.jsp");
+        dispatcher.forward(request, response);
+    }
+
+    //--------------------------------------------------------------------------------
+    public void jumpToPaymentInfos(HttpServletRequest request, HttpServletResponse response)
+            throws SQLException, IOException, ServletException {
+
+        RequestDispatcher dispatcher = request.getRequestDispatcher("customer/payment_info.jsp");
+        dispatcher.forward(request, response);
+    }
+
+    //-------------------------------------- UPDATE CUSTOMER TO DATABASE ------------------------------------------
+    public void updateUser(HttpServletRequest request, HttpServletResponse response)
+            throws SQLException, IOException, ServletException {
+
+        String name = request.getParameter("name");
+        String birth_date = request.getParameter("birth_date");
+        String address = request.getParameter("address");
+        String email = request.getParameter("email");
+        String phone = request.getParameter("phone");
+
+
+        // Lấy session hiện tại (không tạo mới)
+        HttpSession session = request.getSession(false);
+        // Kiểm tra nếu session tồn tại
+        // Lấy user từ session
+        User user = (User) session.getAttribute("user");
+
+
+        // Update thông tin user
+        user.setFullName(name);
+        user.setBirthDate(birth_date);
+        user.setAddress(address);
+        user.setEmail(email);
+        user.setPhone(phone);
+        System.out.println(user);
+        customerDAO.updateUser(user);
+        session.setAttribute("user", user);
+
+        jumpToInfo(user.getUserId(),request,response);
+
+    }
+
 
 }

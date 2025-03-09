@@ -23,13 +23,35 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link" href="index.jsp">Trang chủ</a></li>
+                <li class="nav-item"><a class="nav-link" href="/home">Trang chủ</a></li>
                 <li class="nav-item"><a class="nav-link" href="flights.jsp">Đặt vé</a></li>
                 <li class="nav-item"><a class="nav-link" href="contact.jsp">Liên hệ</a></li>
             </ul>
             <div class="ms-3">
-                <a href="customer/login.jsp" class="btn btn-light btn-login" data-bs-toggle="modal" data-bs-target="#loginModal">Đăng nhập</a>
+                <c:choose>
+                    <c:when test="${not empty sessionScope.user}">
+                        <button class="btn btn-light" onclick="logout()">Đăng xuất</button>
+                        <a href="/customer/info.jsp?userId=${sessionScope.user.userId}" class="nav-link text-light">
+                            Xin chào, ${sessionScope.user.fullName}!
+                        </a>
+                    </c:when>
+                    <c:otherwise>
+                        <a href="#" class="btn btn-light btn-login" data-bs-toggle="modal" data-bs-target="#loginModal">Đăng nhập</a>
+                    </c:otherwise>
+                </c:choose>
             </div>
         </div>
     </div>
 </nav>
+<script>
+    function logout() {
+        fetch('/LogoutServlet')
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "logged_out") {
+                    location.reload();
+                }
+            })
+            .catch(error => console.error('Lỗi khi logout:', error));
+    }
+</script>

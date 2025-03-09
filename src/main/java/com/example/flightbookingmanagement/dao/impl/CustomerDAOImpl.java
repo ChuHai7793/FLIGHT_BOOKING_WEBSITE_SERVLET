@@ -1,6 +1,6 @@
 package com.example.flightbookingmanagement.dao.impl;
 
-import com.example.flightbookingmanagement.config.DatabaseConfig;
+import com.example.flightbookingmanagement.dto.PaymentInfoDTO;
 import com.example.flightbookingmanagement.dto.SearchedTicketDTO;
 import com.example.flightbookingmanagement.dto.TransactionHistoryDTO;
 import com.example.flightbookingmanagement.dao.interfaces.ICustomerDAO;
@@ -17,15 +17,18 @@ import static com.example.flightbookingmanagement.config.DatabaseConfig.getConne
 public class CustomerDAOImpl implements ICustomerDAO {
 
 
-    private static final String TRANSACTION_HISTORY_SQL = "SELECT\n" +
-                                                        "    f.departure_location,\n" +
-                                                        "    f.arrival_location ,\n" +
-                                                        "    t.booking_date,\n" +
-                                                        "    t.travel_date,\n" +
-                                                        "    f.price ,\n" +
-                                                        "    t.status \n" +
-                                                        "FROM tickets t\n" +
-                                                        "JOIN flights f ON t.flight_id = f.flight_id;";
+    private static final String PAYMENT_INFO_SQL = "SELECT f.flight_code, \n" +
+                                                            "f.departure_location,f.arrival_location,\n" +
+                                                            "t.booking_date,t.travel_date,f.price \n" +
+                                                        "FROM tickets t JOIN flights f ON t.flight_id = f.flight_id \n"+
+                                                        "WHERE t.user_id = ?;";
+
+    private static final String TRANSACTION_HISTORY_SQL = "SELECT f.departure_location,\n" +
+                                    " f.arrival_location ,t.booking_date,\n" +
+                                    " t.travel_date,f.price, t.status \n" +
+                                    "FROM tickets t\n" +
+                                    "JOIN flights f ON t.flight_id = f.flight_id \n" +
+                                    "WHERE t.user_id = ?;";
 
     private static final String FLIGHTS_INFO_SQL = "SELECT\n" +
             "    f.airline ,\n" +
@@ -38,15 +41,46 @@ public class CustomerDAOImpl implements ICustomerDAO {
             "    AND f.arrival_location = ?\n" +
             "    AND DATE(f.departure_time) = ?;";
 
-    private static final String LOGIN_QUERY = "SELECT * FROM users WHERE email = ? AND password = ?";
+    private static final String UPDATE_USERS_SQL = "update users set full_name = ?," +
+                                                "birth_date= ?, " +
+                                                "address = ?, email = ?," +
+                                                "phone = ? " + "where user_id = ?";
+//                                                "gender = ?,national_id = ?,nationality= ?, membershipLevel = ?," +
+//                                                " wallet = ?,createdAt = ? where id = ?";
+
+
 
     public CustomerDAOImpl() {
     }
 
-    public List<TransactionHistoryDTO> selectTransactionHistory() throws SQLException {
+    @Override
+    public List<PaymentInfoDTO> selectPaymentInfo(int userId) throws SQLException {
+        List<PaymentInfoDTO> payment_infos = new ArrayList<>();
+        try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(PAYMENT_INFO_SQL)) {
+            preparedStatement.setInt(1, userId);
+            ResultSet rs = preparedStatement.executeQuery();
+
+            while (rs.next()) {
+                String flight_code = rs.getString("flight_code");
+                String departure_location = rs.getString("departure_location");
+                String arrival_location = rs.getString("arrival_location");
+                Timestamp booking_date = rs.getTimestamp("booking_date");
+                Date travel_date = rs.getDate("travel_date");
+                Integer price = rs.getInt("price");
+
+                PaymentInfoDTO payment_info = new PaymentInfoDTO(flight_code,departure_location, arrival_location
+                        , booking_date, travel_date, price);
+                payment_infos.add(payment_info);
+            }
+        }
+        return payment_infos;
+    }
+
+    @Override
+    public List<TransactionHistoryDTO> selectTransactionHistory(int userId) throws SQLException {
         List<TransactionHistoryDTO> transaction_histories = new ArrayList<>();
         try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(TRANSACTION_HISTORY_SQL)) {
-
+            preparedStatement.setInt(1, userId);
             ResultSet rs = preparedStatement.executeQuery();
 
             while (rs.next()) {
@@ -57,17 +91,15 @@ public class CustomerDAOImpl implements ICustomerDAO {
                 String price = rs.getString("price");
                 String status = rs.getString("status");
 
-                TransactionHistoryDTO transaction_history = new TransactionHistoryDTO(departure_location,arrival_location
-                                                                                        ,booking_date,travel_date,price,status);
+                TransactionHistoryDTO transaction_history = new TransactionHistoryDTO(departure_location, arrival_location
+                        , booking_date, travel_date, price, status);
                 transaction_histories.add(transaction_history);
             }
-        } catch (SQLException e) {
-            throw new SQLException(e);
         }
         return transaction_histories;
     }
 
-
+    @Override
     public List<SearchedTicketDTO> selectFlightsFromSearchedForm(String departure_location,
                                                                  String arrival_location,
                                                                  String departure_time) throws SQLException {
@@ -89,45 +121,27 @@ public class CustomerDAOImpl implements ICustomerDAO {
                 String flight_time = rs.getString("flight_time");
                 String price = rs.getString("price");
 
-                SearchedTicketDTO searchedTicket = new SearchedTicketDTO(airlineName,flight_code,flight_time,price);
+                SearchedTicketDTO searchedTicket = new SearchedTicketDTO(airlineName, flight_code, flight_time, price);
                 searchedTickets.add(searchedTicket);
             }
-        } catch (SQLException e) {
-            throw new SQLException(e);
         }
         return searchedTickets;
     }
 
-    @Override
-    public User validateUser(String email, String password) {
-        try (Connection conn = DatabaseConfig.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(LOGIN_QUERY)) {
+    public boolean updateUser(User user) throws SQLException {
+        boolean rowUpdated;
+        try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement(UPDATE_USERS_SQL);) {
+            statement.setString(1, user.getFullName());
+            statement.setString(2, user.getBirthDate());
+            statement.setString(3, user.getAddress());
+            statement.setString(4, user.getEmail());
+            statement.setString(5, user.getPhone());
+            statement.setInt(6, user.getUserId());
 
-            stmt.setString(1, email);
-            stmt.setString(2, password);
-            ResultSet rs = stmt.executeQuery();
 
-            if (rs.next()) {
-                return new User(
-                        rs.getInt("userId"),
-                        rs.getString("role"),
-                        rs.getString("email"),
-                        rs.getString("password"),
-                        rs.getString("phone"),
-                        rs.getString("fullName"),
-                        rs.getString("birthDate"),
-                        rs.getString("gender"),
-                        rs.getString("address"),
-                        rs.getString("nationalId"),
-                        rs.getString("nationality"),
-                        rs.getString("membershipLevel"),
-                        rs.getDouble("wallet"),
-                        rs.getTimestamp("createdAt")
-                );
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+            rowUpdated = statement.executeUpdate() > 0;
         }
-        return null;
+        return rowUpdated;
     }
+
 }

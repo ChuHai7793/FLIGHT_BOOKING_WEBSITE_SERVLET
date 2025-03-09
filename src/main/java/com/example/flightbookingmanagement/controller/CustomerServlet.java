@@ -3,6 +3,7 @@ package com.example.flightbookingmanagement.controller;
 
 import com.example.flightbookingmanagement.dto.TransactionHistoryDTO;
 import com.example.flightbookingmanagement.dao.impl.CustomerDAOImpl;
+import com.example.flightbookingmanagement.model.User;
 import com.example.flightbookingmanagement.service.CustomerService;
 
 import javax.servlet.RequestDispatcher;
@@ -40,16 +41,19 @@ public class CustomerServlet extends HttpServlet {
                     CustomerService.selectAllFlightsFromSearchForm(req);
                     CustomerService.jumpToOneWayTicket(req, resp);
                     break;
-                case "edit":
-
+//                case "edit":
+//                    CustomerService.updateUser(req, resp);
+//                    break;
+                case "checkTransactionHistory":
+                    CustomerService.showAllTransactionHistories(req);
+                    CustomerService.jumpToTransactionHistory(req, resp);
                     break;
-                case "delete":
 
+                case "checkPaymentInfo":
+                    CustomerService.showAllPaymentInfos(req);
+                    CustomerService.jumpToPaymentInfos(req, resp);
                     break;
 
-                case "findByCountry":
-
-                    break;
                 case "sortByName":
 
                     break;
@@ -78,9 +82,9 @@ public class CustomerServlet extends HttpServlet {
                     CustomerService.jumpToOneWayTicket(req, resp);
                     break;
                 case "edit":
-
+                    CustomerService.updateUser(req, resp);
                     break;
-                case "delete":
+                case "changePassword":
 
                     break;
 
@@ -98,4 +102,5 @@ public class CustomerServlet extends HttpServlet {
             throw new ServletException(ex);
         }
     }
+
 }
