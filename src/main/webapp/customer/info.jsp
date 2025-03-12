@@ -1,4 +1,3 @@
-
 <%@ include file="/WEB-INF/view/common/header.jsp" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
@@ -7,7 +6,7 @@
     <div class="row">
         <!-- Sidebar -->
         <div class="col-md-3 border p-3">
-            <a href="info.jsp" class="d-block mb-2 text-primary">Thông tin cá nhân</a>
+            <a href="../customer/info.jsp" class="d-block mb-2 text-primary">Thông tin cá nhân</a>
             <a href="../customer?action=checkPaymentInfo" class="d-block mb-2 text-primary">Thanh toán</a>
             <a href="../customer?action=checkTransactionHistory" class="d-block mb-2 text-primary">Lịch sử giao dịch</a>
             <a href="change_password.jsp" class="d-block mb-2 text-primary">Đổi mật khẩu</a>
@@ -44,28 +43,42 @@
                 <button type="button" class="btn-close" onclick="hideEditForm()" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form action="../customer" method="post"> <!-- Hiện tại đang ở /customer nên action="" -->
+                <form action="../customer" method="post" accept-charset="UTF-8">
+                    <!-- Hiện tại đang ở /customer nên action="" -->
                     <input type="hidden" name="action" value="edit">
                     <input type="hidden" name="userId" value=${user.userId}>
                     <div class="mb-3">
                         <label for="name" class="form-label">Tên:</label>
-                        <input type="text" class="form-control" id="name" name="name" value="${sessionScope.user.fullName}">
+                        <input type="text" class="form-control" id="name" name="name"
+                               value="${sessionScope.user.fullName}">
                     </div>
                     <div class="mb-3">
                         <label for="birth_date" class="form-label">Ngày sinh:</label>
-                        <input type="date" class="form-control" id="birth_date" name="birth_date" value="${sessionScope.user.birthDate}">
+                        <input type="date" class="form-control" id="birth_date" name="birth_date"
+                               value="${sessionScope.user.birthDate}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="gender" class="form-label">Giới tính:</label>
+                        <select name="gender" id="gender">
+                            <option type="text" value="male">Male</option>
+                            <option type="text" value="female">Female</option>
+                        </select>
+                        <%--<input type="text" class="form-control" id="gender" name="gender" value="${sessionScope.user.gender}">--%>
                     </div>
                     <div class="mb-3">
                         <label for="address" class="form-label">Địa chỉ:</label>
-                        <input type="text" class="form-control" id="address" name="address" value="${sessionScope.user.address}">
+                        <input type="text" class="form-control" id="address" name="address"
+                               value="${sessionScope.user.address}">
                     </div>
                     <div class="mb-3">
                         <label for="email" class="form-label">Email:</label>
-                        <input type="email" class="form-control" id="email" name="email" value="${sessionScope.user.email}">
+                        <input type="email" class="form-control" id="email" name="email"
+                               value="${sessionScope.user.email}">
                     </div>
                     <div class="mb-3">
                         <label for="phone" class="form-label">Điện thoại:</label>
-                        <input type="tel" class="form-control" id="phone" name="phone" value="${sessionScope.user.phone}">
+                        <input type="tel" class="form-control" id="phone" name="phone"
+                               value="${sessionScope.user.phone}">
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" onclick="hideEditForm()">Hủy</button>

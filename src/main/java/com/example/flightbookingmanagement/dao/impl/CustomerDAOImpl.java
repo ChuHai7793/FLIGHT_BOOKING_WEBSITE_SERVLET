@@ -5,6 +5,7 @@ import com.example.flightbookingmanagement.dto.SearchedTicketDTO;
 import com.example.flightbookingmanagement.dto.TransactionHistoryDTO;
 import com.example.flightbookingmanagement.dao.interfaces.ICustomerDAO;
 import com.example.flightbookingmanagement.model.User;
+import com.example.flightbookingmanagement.service.SQLService;
 
 
 import java.sql.*;
@@ -15,39 +16,36 @@ import java.util.List;
 import static com.example.flightbookingmanagement.config.DatabaseConfig.getConnection;
 
 public class CustomerDAOImpl implements ICustomerDAO {
-
-
-    private static final String PAYMENT_INFO_SQL = "SELECT f.flight_code, \n" +
-                                                            "f.departure_location,f.arrival_location,\n" +
-                                                            "t.booking_date,t.travel_date,f.price \n" +
-                                                        "FROM tickets t JOIN flights f ON t.flight_id = f.flight_id \n"+
-                                                        "WHERE t.user_id = ?;";
-
-    private static final String TRANSACTION_HISTORY_SQL = "SELECT f.departure_location,\n" +
-                                    " f.arrival_location ,t.booking_date,\n" +
-                                    " t.travel_date,f.price, t.status \n" +
-                                    "FROM tickets t\n" +
-                                    "JOIN flights f ON t.flight_id = f.flight_id \n" +
-                                    "WHERE t.user_id = ?;";
-
-    private static final String FLIGHTS_INFO_SQL = "SELECT\n" +
-            "    f.airline ,\n" +
-            "    f.flight_code ,\n" +
-            " CONCAT(TIME_FORMAT(f.departure_time, '%H:%i'), ' → ', TIME_FORMAT(f.arrival_time, '%H:%i')) AS flight_time," +
-            "    f.price \n" +
-            "FROM flights f\n" +
-            "WHERE\n" +
-            "    f.departure_location = ?\n" +
-            "    AND f.arrival_location = ?\n" +
-            "    AND DATE(f.departure_time) = ?;";
-
-    private static final String UPDATE_USERS_SQL = "update users set full_name = ?," +
-                                                "birth_date= ?, " +
-                                                "address = ?, email = ?," +
-                                                "phone = ? " + "where user_id = ?";
-//                                                "gender = ?,national_id = ?,nationality= ?, membershipLevel = ?," +
-//                                                " wallet = ?,createdAt = ? where id = ?";
-
+//
+//
+//    private static final String PAYMENT_INFO_SQL = "SELECT f.flight_code, \n" +
+//            "f.departure_location,f.arrival_location,\n" +
+//            "t.booking_date,t.travel_date,f.price \n" +
+//            "FROM tickets t JOIN flights f ON t.flight_id = f.flight_id \n" +
+//            "WHERE t.user_id = ?;";
+//
+//    private static final String TRANSACTION_HISTORY_SQL = "SELECT f.departure_location,\n" +
+//            " f.arrival_location ,t.booking_date,\n" +
+//            " t.travel_date,f.price, t.status \n" +
+//            "FROM tickets t\n" +
+//            "JOIN flights f ON t.flight_id = f.flight_id \n" +
+//            "WHERE t.user_id = ?;";
+//
+//    private static final String FLIGHTS_INFO_SQL = "SELECT\n" +
+//            "    f.airline ,\n" +
+//            "    f.flight_code ,\n" +
+//            " CONCAT(TIME_FORMAT(f.departure_time, '%H:%i'), ' → ', TIME_FORMAT(f.arrival_time, '%H:%i')) AS flight_time," +
+//            "    f.price \n" +
+//            "FROM flights f\n" +
+//            "WHERE\n" +
+//            "    f.departure_location = ?\n" +
+//            "    AND f.arrival_location = ?\n" +
+//            "    AND DATE(f.departure_time) = ?;";
+//
+//
+//    private static final String UPDATE_USERS_SQL = "UPDATE users SET full_name = ?, birth_date = ?, address = ?, email = ?, phone = ? WHERE user_id = ?";
+//    private static final String UPDATE_PASSWORD_SQL = "UPDATE users SET password = ? WHERE user_id = ?";
+//
 
 
     public CustomerDAOImpl() {
@@ -56,7 +54,7 @@ public class CustomerDAOImpl implements ICustomerDAO {
     @Override
     public List<PaymentInfoDTO> selectPaymentInfo(int userId) throws SQLException {
         List<PaymentInfoDTO> payment_infos = new ArrayList<>();
-        try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(PAYMENT_INFO_SQL)) {
+        try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(SQLService.PAYMENT_INFO_SQL)) {
             preparedStatement.setInt(1, userId);
             ResultSet rs = preparedStatement.executeQuery();
 
@@ -68,7 +66,7 @@ public class CustomerDAOImpl implements ICustomerDAO {
                 Date travel_date = rs.getDate("travel_date");
                 Integer price = rs.getInt("price");
 
-                PaymentInfoDTO payment_info = new PaymentInfoDTO(flight_code,departure_location, arrival_location
+                PaymentInfoDTO payment_info = new PaymentInfoDTO(flight_code, departure_location, arrival_location
                         , booking_date, travel_date, price);
                 payment_infos.add(payment_info);
             }
@@ -79,7 +77,7 @@ public class CustomerDAOImpl implements ICustomerDAO {
     @Override
     public List<TransactionHistoryDTO> selectTransactionHistory(int userId) throws SQLException {
         List<TransactionHistoryDTO> transaction_histories = new ArrayList<>();
-        try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(TRANSACTION_HISTORY_SQL)) {
+        try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(SQLService.TRANSACTION_HISTORY_SQL)) {
             preparedStatement.setInt(1, userId);
             ResultSet rs = preparedStatement.executeQuery();
 
@@ -104,7 +102,7 @@ public class CustomerDAOImpl implements ICustomerDAO {
                                                                  String arrival_location,
                                                                  String departure_time) throws SQLException {
         List<SearchedTicketDTO> searchedTickets = new ArrayList<>();
-        try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(FLIGHTS_INFO_SQL)) {
+        try (Connection connection = getConnection(); PreparedStatement preparedStatement = connection.prepareStatement(SQLService.FLIGHTS_INFO_SQL)) {
             preparedStatement.setString(1, departure_location);
             preparedStatement.setString(2, arrival_location);
 
@@ -128,16 +126,28 @@ public class CustomerDAOImpl implements ICustomerDAO {
         return searchedTickets;
     }
 
-    public boolean updateUser(User user) throws SQLException {
+    public boolean updateCustomer(User user) throws SQLException {
         boolean rowUpdated;
-        try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement(UPDATE_USERS_SQL);) {
+        try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement(SQLService.UPDATE_USERS_SQL);) {
             statement.setString(1, user.getFullName());
             statement.setString(2, user.getBirthDate());
-            statement.setString(3, user.getAddress());
-            statement.setString(4, user.getEmail());
-            statement.setString(5, user.getPhone());
-            statement.setInt(6, user.getUserId());
+            statement.setString(3, user.getGender());
+            statement.setString(4, user.getAddress());
+            statement.setString(5, user.getEmail());
+            statement.setString(6, user.getPhone());
+            statement.setInt(7, user.getUserId());
 
+
+            rowUpdated = statement.executeUpdate() > 0;
+        }
+        return rowUpdated;
+    }
+
+    public boolean updatePassword(User user,String new_password) throws SQLException {
+        boolean rowUpdated;
+        try (Connection connection = getConnection(); PreparedStatement statement = connection.prepareStatement(SQLService.UPDATE_PASSWORD_SQL);) {
+            statement.setString(1,new_password);
+            statement.setInt(2,user.getUserId());
 
             rowUpdated = statement.executeUpdate() > 0;
         }

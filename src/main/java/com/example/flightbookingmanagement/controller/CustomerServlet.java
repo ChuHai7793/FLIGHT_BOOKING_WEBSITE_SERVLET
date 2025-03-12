@@ -19,10 +19,11 @@ import java.util.List;
 @WebServlet(name = "CustomerServlet", urlPatterns = "/customer")
 public class CustomerServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
-    private CustomerService CustomerService;
+    private CustomerService customerService;
+
 
     public void init() {
-        CustomerService = new CustomerService();
+        customerService = new CustomerService();
     }
 
     @Override
@@ -36,22 +37,16 @@ public class CustomerServlet extends HttpServlet {
         try {
             switch (action) {
                 case "searchTicket":
-
-                    CustomerService.updateSearchTicketForm(req);
-                    CustomerService.selectAllFlightsFromSearchForm(req);
-                    CustomerService.jumpToOneWayTicket(req, resp);
+                    customerService.updateSearchTicketForm(req);
+                    customerService.selectAllFlightsFromSearchForm(req,resp);
                     break;
-//                case "edit":
-//                    CustomerService.updateUser(req, resp);
-//                    break;
+
                 case "checkTransactionHistory":
-                    CustomerService.showAllTransactionHistories(req);
-                    CustomerService.jumpToTransactionHistory(req, resp);
+                    customerService.showAllTransactionHistories(req,resp);
                     break;
 
                 case "checkPaymentInfo":
-                    CustomerService.showAllPaymentInfos(req);
-                    CustomerService.jumpToPaymentInfos(req, resp);
+                    customerService.showAllPaymentInfos(req,resp);
                     break;
 
                 case "sortByName":
@@ -68,6 +63,9 @@ public class CustomerServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        req.setCharacterEncoding("UTF-8");
+        resp.setContentType("text/html; charset=UTF-8");
+        resp.setCharacterEncoding("UTF-8");
         String action = req.getParameter("action");
         if (action == null) {
             action = "";
@@ -77,15 +75,14 @@ public class CustomerServlet extends HttpServlet {
             switch (action) {
                 case "sort":
 
-                    CustomerService.updateSearchTicketForm(req);
-                    CustomerService.selectAllFlightsFromSearchForm(req);
-                    CustomerService.jumpToOneWayTicket(req, resp);
+                    customerService.updateSearchTicketForm(req);
+                    customerService.selectAllFlightsFromSearchForm(req,resp);
                     break;
                 case "edit":
-                    CustomerService.updateUser(req, resp);
+                    customerService.updateCustomer(req, resp);
                     break;
                 case "changePassword":
-
+                    customerService.updatePassword(req, resp);
                     break;
 
                 case "findByCountry":

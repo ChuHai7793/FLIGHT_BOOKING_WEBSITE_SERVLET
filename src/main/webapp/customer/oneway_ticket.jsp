@@ -2,6 +2,7 @@
 <%--<%@ page contentType="text/html;charset=UTF-8" language="java" %>--%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ include file="/WEB-INF/view/common/header.jsp" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -9,12 +10,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trang cá nhân</title>
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
     <style>
         /* Căn giữa theo chiều dọc */
-         .table td, .table th {
-             vertical-align: middle;
-         }
+        .table td, .table th {
+            vertical-align: middle;
+        }
 
         /* Style cho container bên phải */
         .sidebar {
@@ -44,20 +45,39 @@
             font-size: 14px;
             padding: 8px;
         }
+
         .table-container {
-            height:fit-content;
+            height: fit-content;
             max-height: calc(100vh - 150px); /* Chiều cao cố định, bạn có thể điều chỉnh */
             overflow-y: auto; /* Hiển thị thanh cuộn dọc khi nội dung vượt quá */
             border: 10px solid #dee2e6; /* Tùy chọn: thêm viền để khớp với bảng */
             padding: 0; /* Loại bỏ padding nếu không cần thiết */
         }
+
         .table-container table {
             margin: 0; /* Loại bỏ margin mặc định của table */
             width: 100%; /* Đảm bảo bảng chiếm toàn bộ chiều ngang */
         }
+        tr.vna td {
+            background-color: #005bac !important;
+            color: white !important;
+        }
+        tr.vietjet td {
+            background-color: #ec1c24 !important;
+            color: white !important;
+        }
+        tr.pacific td {
+            background-color: #f7941e !important;
+            color: black !important;
+        }
+        tr.default td {
+            background-color: white !important;
+            color: black !important;
+        }
+
     </style>
-
-
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 </head>
 <body>
 
@@ -72,50 +92,47 @@
                         <th scope="col" class="text-center">Mã chuyến bay</th>
                         <th scope="col" class="text-center">Giờ</th>
                         <th scope="col" class="text-center">Giá</th>
-                        <th scope="col" class="text-center">Chi tiết</th>
                         <th scope="col" class="text-center">Đặt vé</th>
                     </tr>
                     </thead>
                     <tbody>
-
-                    <c:choose>
-                        <c:when test="${empty searchedTickets}">
-                            <tr>
-                                <td class="text-center" colspan="6">Không tìm thấy chuyến bay khớp với tìm kiếm </td>
-                            </tr>
-
-                        </c:when>
-                        <c:otherwise>
-                            <c:forEach var="searchedTicket" items="${searchedTickets}">
-                                <tr>
-                                    <td class="text-center">${searchedTicket.airlineName}</td>
-                                    <td class="text-center">${searchedTicket.flight_code}</td>
-                                    <td class="text-center">${searchedTicket.flight_time}</td>
-                                    <td class="text-center">${searchedTicket.price}</td>
-                                    <td class="text-center">
-                                        <button type="button" class="btn btn-link p-0" data-bs-toggle="modal" data-bs-target="#detailModal">
-                                            Chi tiết
-                                        </button>
-<%--                                        <a href="#" class="btn btn-link p-0">Chi tiết</a>--%>
-                                    </td>
-                                    <td class="text-center">
-                                        <input type="checkbox" class="form-check-input rounded-circle">
-                                    </td>
-                                </tr>
-                            </c:forEach>
-                        </c:otherwise>
-                    </c:choose>
-
-                    <!-- Thêm thêm hàng nếu cần -->
+                    <c:forEach var="searchedTicket" items="${searchedTickets}">
+                        <c:choose>
+                            <c:when test='${searchedTicket.airlineName eq "Vietnam Airlines"}'>
+                                <c:set var="airlineClass" value="vna"/>
+                            </c:when>
+                            <c:when test='${searchedTicket.airlineName eq "VietJet Air"}'>
+                                <c:set var="airlineClass" value="vietjet"/>
+                            </c:when>
+                            <c:when test='${searchedTicket.airlineName eq "Pacific Airlines"}'>
+                                <c:set var="airlineClass" value="pacific"/>
+                            </c:when>
+                            <c:otherwise>
+                                <c:set var="airlineClass" value="default"/>
+                            </c:otherwise>
+                        </c:choose>
+                        <tr class="${airlineClass}">
+                            <td class="text-center">${searchedTicket.airlineName}</td>
+                            <td class="text-center">${searchedTicket.flight_code}</td>
+                            <td class="text-center">${searchedTicket.flight_time}</td>
+                            <td class="text-end">
+                                $<fmt:setLocale value="vi_VN"/>
+                                <fmt:formatNumber value="${searchedTicket.price}" type="currency"/>
+                            </td>
+                            <td class="text-center">
+                                <button type="button" class="btn btn-link p-0" data-bs-toggle="modal" data-bs-target="#detailModal">
+                                    Đặt vé
+                                </button>
+                            </td>
+                        </tr>
+                    </c:forEach>
                     </tbody>
                 </table>
             </div>
-            <div class="text-center mt-3">
-                <button type="button" class="btn btn-success">Xác Nhận</button>
-            </div>
+
         </div>
 
-    <!-- Container mới bên phải -->
+        <!-- Container mới bên phải -->
         <div class="col-lg-4">
             <div class="sidebar">
                 <div class="card">
@@ -127,7 +144,8 @@
                             <!-- Checkbox Sắp xếp -->
                             <div class="mb-3">
                                 <h6 class="card-title mb-2" style="font-size: 15px;">Sắp xếp</h6>
-                                <select id="sortSelect" class="form-select" aria-label="Sắp xếp" name="orderBy"> <!-- Thêm name để gửi dữ liệu -->
+                                <select id="sortSelect" class="form-select" aria-label="Sắp xếp" name="orderBy">
+                                    <!-- Thêm name để gửi dữ liệu -->
                                     <option value="recommend" selected>Đề xuất</option>
                                     <option value="price">Giá (thấp đến cao)</option>
                                     <option value="time">Thời gian khởi hành</option>
@@ -137,34 +155,41 @@
 
                             <div class="mb-2">
                                 <label for="departure_location" class="form-label">Điểm đi</label>
-                                <input type="text" class="form-control" id="departure_location" name="departure_location" value="${SearchedTicketForm.departure_location}">
+                                <input type="text" class="form-control" id="departure_location"
+                                       name="departure_location" value="${SearchedTicketForm.departure_location}">
                             </div>
                             <div class="mb-2">
                                 <label for="arrival_location" class="form-label">Điểm đến</label>
-                                <input type="text" class="form-control" id="arrival_location" name="arrival_location" value="${SearchedTicketForm.arrival_location}">
+                                <input type="text" class="form-control" id="arrival_location" name="arrival_location"
+                                       value="${SearchedTicketForm.arrival_location}">
                             </div>
                             <div class="mb-2">
                                 <label for="leaving_date" class="form-label">Ngày đi</label>
-                                <input type="date" class="form-control" id="leaving_date" name="leaving_date" value="${SearchedTicketForm.leaving_date}">
+                                <input type="date" class="form-control" id="leaving_date" name="leaving_date"
+                                       value="${SearchedTicketForm.leaving_date}">
                             </div>
                             <div class="mb-2">
                                 <label for="return_date" class="form-label">Ngày về</label>
-                                <input type="date" class="form-control" id="return_date" name="return_date" value="${SearchedTicketForm.departure_location}">
+                                <input type="date" class="form-control" id="return_date" name="return_date"
+                                       value="${SearchedTicketForm.departure_location}">
                             </div>
                             <%-- Xet gia tri cua nguoi lon --%>
                             <div class="mb-2">
                                 <label for="adult_num" class="form-label">Người lớn</label>
-                                <input type="number" class="form-control" id="adult_num" name="adult_num" min="0" value="${SearchedTicketForm.adult_num}">
+                                <input type="number" class="form-control" id="adult_num" name="adult_num" min="0"
+                                       value="${SearchedTicketForm.adult_num}">
                                 <%-- Xet gia tri cua tre em --%>
                             </div>
                             <div class="mb-2">
                                 <label for="kid_num" class="form-label">Trẻ em</label>
-                                <input type="number" class="form-control" id="kid_num" name="kid_num" min="0" value="${SearchedTicketForm.kid_num}">
+                                <input type="number" class="form-control" id="kid_num" name="kid_num" min="0"
+                                       value="${SearchedTicketForm.kid_num}">
                             </div>
                             <%-- Xet gia tri cua baby --%>
                             <div class="mb-3">
                                 <label for="baby_num" class="form-label">Em bé</label>
-                                <input type="number" class="form-control" id="baby_num" name="baby_num" min="0" value="${SearchedTicketForm.baby_num}">
+                                <input type="number" class="form-control" id="baby_num" name="baby_num" min="0"
+                                       value="${SearchedTicketForm.baby_num}">
                             </div>
                             <button type="submit" class="btn btn-primary w-100">Tìm kiếm</button>
                         </form>
@@ -210,40 +235,72 @@
                 </div>
 
                 <!-- Bảng thông tin giá vé -->
-                <table class="table table-bordered mt-3">
-                    <thead class="table-light">
-                    <tr>
-                        <th>Loại hành khách</th>
-                        <th>Số lượng vé</th>
-                        <th>Giá mỗi vé</th>
-                        <th>Thuế và phí</th>
-                        <th>Tổng giá</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td>Người lớn</td>
-                        <td>1</td>
-                        <td>$400</td>
-                        <td>$100</td>
-                        <td>$500</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-            </div>
+                <form action="../customer" method="post" accept-charset="UTF-8">
+                    <input type="hidden" name="action" value="edit">
+                    <input type="hidden" name="userId" value="${user.userId}">
+
+                    <div class="row">
+                        <!-- Cột bên trái -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Tên:</label>
+                                <input type="text" class="form-control" id="name" name="name"
+                                       value="${sessionScope.user.fullName}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="nationalId" class="form-label">CCCD</label>
+                                <input type="text" class="form-control" id="nationalId" name="nationalId"
+                                       value="${sessionScope.user.nationalId}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">Điện thoại:</label>
+                                <input type="tel" class="form-control" id="phone" name="phone"
+                                       value="${sessionScope.user.phone}">
+                            </div>
+                        </div>
+
+                        <!-- Cột bên phải -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="luggage" class="form-label">Hành lý kí gửi</label>
+                                <input type="text" class="form-control" id="luggage" name="luggage"
+                                       value="${sessionScope.user.birthDate}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="seat_number" class="form-label">Số ghế</label>
+                                <input type="email" class="form-control" id="seat_number" name="seat_number"
+                                       value="${sessionScope.user.email}">
+                            </div>
+                            <div class="mb-3">
+                                <label for="gender" class="form-label">Giới tính:</label>
+                                <select name="gender" id="gender" class="form-control">
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer Buttons -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        <input type="submit" class="btn btn-primary" value="Đặt vé">
+                    </div>
+                </form>
         </div>
     </div>
 </div>
 
 <!-- Bootstrap JS và Popper.js -->
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+        integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
+        integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
+        crossorigin="anonymous"></script>
 
 <script>
-    document.getElementById("sortSelect").addEventListener("change", function() {
+    document.getElementById("sortSelect").addEventListener("change", function () {
         document.getElementById("SearchForm").submit();
     });
 
